@@ -1,0 +1,38 @@
+on: 
+  pull_request_review: 
+    types:
+      - submitted 
+  pull_request_event: 
+    types: 
+      - edited
+    
+    
+
+jobs:
+  approved:
+    
+
+    runs-on: ubuntu-latest
+    steps:
+      if: github.event.review.state == 'approved' and github.event.pull_request.state == 'open' and github.event.pull_request.mergeable == 'true' and github.event.pull_request.reviewDecision == 'approved' 
+        - run: echo "This PR is approved, merging!"
+        - name: Merge PR
+        - uses: actions/checkout@v2
+        - uses: actions/merge-pr@v2
+        - with:
+            pr_number: github.event.number
+            sha: github.event.pull_request.head.sha
+            owner: github.event.pull_request.head.repo.owner.login
+            repo: github.event.pull_request.head.repo.name
+            token: ${{ secrets.GITHUB_TOKEN }}
+        - name: Update status
+        - uses: actions/update-github-status@v2
+        - with:
+            sha: github.event.pull_request.head.sha
+            owner: github.event.pull_request.head.repo.owner.login
+            repo: github.event.pull_request.head.repo.name
+            state: success
+            description: "This PR has been approved and merged!"
+            context: auto-merge
+       
+
