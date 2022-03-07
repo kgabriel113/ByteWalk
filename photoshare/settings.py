@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-import django_heroku
+
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (os.environ.get('DEBUG_VALUE') == 'True')
@@ -150,4 +152,6 @@ GCS_BUCKET = os.environ.get('GCS_BUCKET')
 GCS_CREDENTIALS_FILE_PATH = os.path.join(BASE_DIR, "my-key.json")
 GCS_USE_UNSIGNED_URLS = True
 
-django_heroku.settings(locals())
+if os.environ.get('ENVIRONMENT') != 'github':
+    import django_heroku
+    django_heroku.settings(locals())
