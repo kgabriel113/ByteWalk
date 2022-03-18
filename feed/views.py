@@ -128,6 +128,12 @@ def like(request):
 	return HttpResponse(response, content_type = "application/json")
 
 
+@login_required
+def filter_like(u, p):
+	like_data = Like.objects.filter(user=u, post=p)
+	return like_data
+
+
 
 
 
