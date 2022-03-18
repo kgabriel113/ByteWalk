@@ -20,21 +20,7 @@ class RegistrationTestCase(TestCase):
 
         response = c.post('/login/',{
             'username': 'portcommunion',
-            'password': 'respondBoating291'
-        })
-
-        # I'm crying 
-        # failed login gives a 200 response smh
-        self.assertEqual(response.status_code, 200)
-
-        response = c.post('/login/',{
-            'username': 'portcommunion',
             'password': 'respondBloating291'
         })
 
         self.assertEqual(response.status_code, 302)
-
-    
-        
-
-
