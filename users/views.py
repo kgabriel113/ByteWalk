@@ -105,24 +105,16 @@ def delete_friend(request, id):
 
 @login_required
 def profile_view(request, slug):
-
 	p = Profile.objects.filter(slug=slug).first()
 	u = p.user
-	sent_friend_requests = FriendRequest.objects.filter(from_user=p.user)
-	rec_friend_requests = FriendRequest.objects.filter(to_user=p.user)
-	user_posts = Post.objects.filter(user_name=u)
-
-	friends = p.friends.all()
-	# is this user our friend
-	button_status = FriendRequestManager.get_friend_request_status(friend_profile=p, requesting_user=request.user)
 	
 	context = {
 		'u': u,
-		'button_status': button_status,
-		'friends_list': friends,
-		'sent_friend_requests': sent_friend_requests,
-		'rec_friend_requests': rec_friend_requests,
-		'post_count': user_posts.count
+		'button_status': FriendRequestManager.get_friend_request_status(friend_profile=p, requesting_user=request.user),
+		'friends_list': p.friends.all(),
+		'sent_friend_requests': FriendRequest.objects.filter(from_user=p.user),
+		'rec_friend_requests': FriendRequest.objects.filter(to_user=p.user),
+		'post_count': Post.objects.filter(user_name=u).count
 	}
 	return render(request, "users/profile.html", context)
 
@@ -161,21 +153,14 @@ def edit_profile(request):
 def my_profile(request):
 	p = request.user.profile
 	you = p.user
-	sent_friend_requests = FriendRequest.objects.filter(from_user=you)
-	rec_friend_requests = FriendRequest.objects.filter(to_user=you)
-	user_posts = Post.objects.filter(user_name=you)
-	friends = p.friends.all()
-
-	# is this user our friend
-	button_status = FriendRequestManager.get_friend_request_status(friend_profile=p, requesting_user=you)
 
 	context = {
 		'u': you,
-		'button_status': button_status,
-		'friends_list': friends,
-		'sent_friend_requests': sent_friend_requests,
-		'rec_friend_requests': rec_friend_requests,
-		'post_count': user_posts.count
+		'button_status': FriendRequestManager.get_friend_request_status(friend_profile=p, requesting_user=you),
+		'friends_list': p.friends.all(),
+		'sent_friend_requests': FriendRequest.objects.filter(from_user=you),
+		'rec_friend_requests': FriendRequest.objects.filter(to_user=you),
+		'post_count': Post.objects.filter(user_name=you).count
 	}
 
 	return render(request, "users/profile.html", context)
