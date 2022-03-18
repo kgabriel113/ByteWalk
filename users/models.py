@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.db.models.signals import post_save
 from django.conf import settings
 from autoslug import AutoSlugField
+from django.db.models.expressions import RawSQL
 
 class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -18,6 +19,14 @@ class Profile(models.Model):
 
 	def get_absolute_url(self):
 		return "/users/{}".format(self.slug)
+	def friendsOfFriends(self):
+		# SQL query to get all friends of friends of a user. 
+		# Ideally I would do this with a django query set but I am not sure how to do it.
+		return Profile.objects.filter(id__in=RawSQL("\
+				SELECT f2.to_profile_id FROM users_profile_friends as f1 \
+				LEFT JOIN users_profile_friends as f2 ON f1.to_profile_id = f2.from_profile_id \
+				WHERE f1.from_profile_id = %s \
+			", (self.id,)))
 
 def post_save_user_model_receiver(sender, instance, created, *args, **kwargs):
     if created:
