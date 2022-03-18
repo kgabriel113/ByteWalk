@@ -9,42 +9,22 @@ from django.http import HttpResponseRedirect
 from .models import Profile, FriendRequest
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 import random
+from itertools import chain
 
 User = get_user_model()
 
 @login_required
 def users_list(request):
-    users = Profile.objects.exclude(user=request.user)
-    sent_friend_requests = FriendRequest.objects.filter(from_user=request.user)
-    my_friends = request.user.profile.friends.all()
-    sent_to = []
-    friends = []
-    for user in my_friends:
-        friend = user.friends.all()
-        for f in friend:
-            if f in friends:
-                friend = friend.exclude(user=f.user)
-        friends += friend
-    for i in my_friends:
-        if i in friends:
-            friends.remove(i)
-    if request.user.profile in friends:
-        friends.remove(request.user.profile)
-    random_list = random.sample(list(users), min(len(list(users)), 10))
-    for r in random_list:
-        if r in friends:
-            random_list.remove(r)
-    friends += random_list
-    for i in my_friends:
-        if i in friends:
-            friends.remove(i)
-    for se in sent_friend_requests:
-        sent_to.append(se.to_user)
-    context = {
-        'users': friends,
-        'sent': sent_to
-    }
-    return render(request, "users/users_list.html", context)
+	
+	friendsOfFriends = request.user.profile.friendsOfFriends()
+	randomUsers = Profile.objects.exclude(user=request.user).exclude(id__in=friendsOfFriends.values("id")).order_by('?')[:10]
+	users = list(friendsOfFriends) + list(randomUsers)
+	context = {
+		'users': users,
+		'sent': FriendRequest.objects.filter(from_user=request.user).exclude(to_user__in=request.user.profile.friends.values('id').all())
+	}
+	return render(request, "users/users_list.html", context)
+
 
 def friend_list(request):
 	p = request.user.profile
