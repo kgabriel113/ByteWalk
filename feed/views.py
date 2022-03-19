@@ -21,7 +21,7 @@ class PostListView(ListView):
 	def get_context_data(self, **kwargs):
 		context = super(PostListView, self).get_context_data(**kwargs)
 		if self.request.user.is_authenticated:
-			liked = [i for i in Post.objects.all() if Like.objects.filter(user = self.request.user, post=i)]
+			liked = [i for i in Post.objects.all() if filter_like(user = self.request.user, post=i)]
 			context['liked_post'] = liked
 		return context
 
@@ -34,7 +34,7 @@ class UserPostListView(LoginRequiredMixin, ListView):
 	def get_context_data(self, **kwargs):
 		context = super(UserPostListView, self).get_context_data(**kwargs)
 		user = get_object_or_404(User, username=self.kwargs.get('username'))
-		liked = [i for i in Post.objects.filter(user_name=user) if Like.objects.filter(user = self.request.user, post=i)]
+		liked = [i for i in Post.objects.filter(user_name=user) if filter_like(user = self.request.user, post=i)]
 		context['liked_post'] = liked
 		return context
 
@@ -47,7 +47,7 @@ class UserPostListView(LoginRequiredMixin, ListView):
 def post_detail(request, pk):
 	post = get_object_or_404(Post, pk=pk)
 	user = request.user
-	is_liked =  Like.objects.filter(user=user, post=post)
+	is_liked =  filter_like(user=user, post=post)
 	if request.method == 'POST':
 		form = NewCommentForm(request.POST)
 		if form.is_valid():
@@ -102,7 +102,7 @@ def post_delete(request, pk):
 def search_posts(request):
 	query = request.GET.get('p')
 	object_list = Post.objects.filter(tags__icontains=query)
-	liked = [i for i in object_list if Like.objects.filter(user = request.user, post=i)]
+	liked = [i for i in object_list if filter_like(user = request.user, post=i)]
 	context ={
 		'posts': object_list,
 		'liked_post': liked
@@ -115,7 +115,7 @@ def like(request):
 	user = request.user
 	post = Post.objects.get(pk=post_id)
 	liked= False
-	like = Like.objects.filter(user=user, post=post)
+	like = filter_like(user=user, post=post)
 	if like:
 		like.delete()
 	else:
@@ -126,6 +126,12 @@ def like(request):
     }
 	response = json.dumps(resp)
 	return HttpResponse(response, content_type = "application/json")
+
+
+@login_required
+def filter_like(u, p):
+	like_data = Like.objects.filter(user=u, post=p)
+	return like_data
 
 
 
