@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 # Create your tests here.
 
-class SearchPostCase(TestCase):
+class FeedCases(TestCase):
     def setUp(self):
         self.client = Client()
         # I generate random strings on this website https://www.thewordfinder.com/random-word-generator
@@ -28,7 +28,7 @@ class SearchPostCase(TestCase):
             'pic' : 'media/pepehands.png', 
             'tags' : ''
         })
-        self.assertEqual(post_response.status_code, 302)
+        self.assertEqual(post_response.status_code, 200)
 
     def search_post(self):
         post_id = Post.objects.filter(description="pepehands").values("id")
