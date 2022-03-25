@@ -55,9 +55,7 @@ def post_detail(request, pk):
 	user = request.user
 	is_liked =  Like.objects.filter(user=user, post=post)
 
-	# Will get this value from edit-profile.html
 	hide_like_counts = Profile.objects.filter(user=user, hide_like_counts=True)
-	# Will then send this value to render
 
 	if request.method == 'POST':
 		form = NewCommentForm(request.POST)
