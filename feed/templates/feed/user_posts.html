@@ -46,23 +46,47 @@
         {% endif %}
         <div class="card-footer">
           <button class="btn btn-white mr-3 like" id="{{ post.id }}">
-            {% if post in liked_post %}
-            <a
-              href="{% url 'post-like' %}"
-              style="color: red"
-              id="likebtn{{ post.id }}"
-            >
-              Unlike</a
-            >
-            | {{post.likes.count}} {% else %}
-            <a
-              href="{% url 'post-like' %}"
-              style="color: green"
-              id="likebtn{{ post.id }}"
-            >
-              Like</a
-            >
-            | {{post.likes.count}} {% endif %}
+            {% if hide_like_counts %}
+
+              {% if post in liked_post %}
+              <a
+                href="{% url 'post-like' %}"
+                style="color: red"
+                id="likebtn{{ post.id }}"
+              >
+                Unlike</a
+              >
+              {% else %}
+              <a
+                href="{% url 'post-like' %}"
+                style="color: green"
+                id="likebtn{{ post.id }}"
+              >
+                Like</a
+              >
+              {% endif %}
+
+            {% else %}
+
+              {% if post in liked_post %}
+              <a
+                href="{% url 'post-like' %}"
+                style="color: red"
+                id="likebtn{{ post.id }}"
+              >
+                Unlike</a
+              >
+              | {{post.likes.count}} {% else %}
+              <a
+                href="{% url 'post-like' %}"
+                style="color: green"
+                id="likebtn{{ post.id }}"
+              >
+                Like</a
+              >
+              | {{post.likes.count}} {% endif %}
+
+            {% endif %}
           </button>
           <a class="btn btn-outline-info" href="{% url 'post-detail' post.id %}"
             >Comments | {{ post.details.count }}</a

@@ -14,11 +14,14 @@ class Profile(models.Model):
 	bio = models.CharField(max_length=255, blank=True)
 	friends = models.ManyToManyField("Profile", blank=True)
 
+	hide_like_counts = models.BooleanField(default=False)
+
 	def __str__(self):
 		return str(self.user.username)
 
 	def get_absolute_url(self):
 		return "/users/{}".format(self.slug)
+
 	def friendsOfFriends(self):
 		# SQL query to get all friends of friends of a user. 
 		# Ideally I would do this with a django query set but I am not sure how to do it.
