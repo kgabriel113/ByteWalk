@@ -19,6 +19,8 @@ class UserUpdateForm(forms.ModelForm):
 		fields = ['username', 'email']
 
 class ProfileUpdateForm(forms.ModelForm):
+	hide_like_counts = forms.BooleanField(required=False)
+	
 	class Meta:
 		model = Profile
-		fields = ['bio', 'image']
+		fields = ['bio', 'image', 'hide_like_counts']
