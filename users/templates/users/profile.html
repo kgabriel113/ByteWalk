@@ -112,6 +112,44 @@
       </div>
     </div>
     <br />
+    
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card card-signin my-5">
+          <div class="card-body">
+            <div class="row">
+            <h2>Interests ({{ interests.count }})</h2>
+            {% if request.user == u %}
+            <small class="float-right">
+              <a
+                class="btn btn-success mr-2"
+                href="/users/interests/add"
+              >Add</a>
+            </small>
+            {% endif %}
+            </div>
+            <hr class="my-2" />
+            {% if not interests %}
+            <h5><i>No Interests!</i></h5>
+            {% else %} {% for interest in interests %}
+            <div class="row">
+              <h3>{{interest.name}}</h3>
+              {% if request.user == u %}
+              <small class="float-right">
+                <a
+                  class="btn btn-warning mr-2"
+                  href="{{ interest.get_delete_url }}"
+                  >Remove</a
+                >
+              </small>
+              {% endif %}
+            </div>
+            <br /><br />
+            {% endfor %} {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
     {% if request.user == u %}
     <div class="row">
       <div class="col-md-6">

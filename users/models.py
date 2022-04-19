@@ -13,12 +13,15 @@ class Profile(models.Model):
 	slug = AutoSlugField(populate_from='user')
 	bio = models.CharField(max_length=255, blank=True)
 	friends = models.ManyToManyField("Profile", blank=True)
+	interests = models.ManyToManyField("Interest", blank=True)
+	hide_like_counts = models.BooleanField(default=False)
 
 	def __str__(self):
 		return str(self.user.username)
 
 	def get_absolute_url(self):
 		return "/users/{}".format(self.slug)
+
 	def friendsOfFriends(self):
 		# SQL query to get all friends of friends of a user. 
 		# Ideally I would do this with a django query set but I am not sure how to do it.
@@ -27,7 +30,14 @@ class Profile(models.Model):
 				LEFT JOIN users_profile_friends as f2 ON f1.to_profile_id = f2.from_profile_id \
 				WHERE f1.from_profile_id = %s \
 			", (self.id,)))
-
+	def interestsOfFriends(self):
+		# SQL query to get all interests of friends of a user. 
+		return Interest.objects.filter(id__in=RawSQL("\
+				SELECT i2.interest_id FROM users_profile as i1 \
+				LEFT JOIN users_profile_friends as f ON i2.profile_id = f.to_profile_id \
+				LEFT JOIN users_profile_interests as i2 ON f.id = i2.profile_id \
+				WHERE i1.id = %s \
+			", (self.id,)))
 def post_save_user_model_receiver(sender, instance, created, *args, **kwargs):
     if created:
         try:
@@ -46,4 +56,10 @@ class FriendRequest(models.Model):
 		return "From {}, to {}".format(self.from_user.username, self.to_user.username)
 
 
+class Interest(models.Model):
+	name = models.CharField(max_length=255)
 
+	def __str__(self):
+		return self.name
+	def get_delete_url(self):
+		return "/users/interests/delete/{}".format(self.name)

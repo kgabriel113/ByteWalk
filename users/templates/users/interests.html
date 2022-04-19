@@ -1,0 +1,58 @@
+{% extends "feed/layout.html" %} {% load static %} {% block searchform %}
+<form
+  class="form-inline my-2 my-lg-0 ml-5"
+  action="/users/interests/add/"
+  method="post"
+>{% csrf_token %}
+  <input name="interest" type="text" placeholder="Add Interest" />
+  <button class="btn btn-success my-2 my-sm-0 ml-4" type="submit">
+    Add
+  </button>
+</form>
+{% endblock searchform %} {% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-8">
+      {% if not interests %}
+      <br /><br />
+      <h2><i>No Interests!</i></h2>
+      {% else %}
+      <div class="card card-signin my-5">
+        <div class="card-body">
+          {% for interest in interests %}
+          <div class="row">
+          <h3>{{ interest.name }}</h3>
+          <small class="float-right">
+            <a
+              class="btn btn-warning mr-2"
+              href="{{ interest.get_delete_url }}"
+              >Remove</a
+            >
+          </small></div>
+          <br /><br />
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-md-4">
+      <div class="card card-signin my-5">
+        <a href="{{ request.user.profile.get_absolute_url }}"
+          ><img
+            class="card-img-top"
+            src="{{ request.user.profile.image.url }}"
+            alt=""
+        /></a>
+        <div class="card-body">
+          <h5 class="card-title text-center">{{ request.user }}</h5>
+          <h6 class="text-center">
+            {{ request.user.profile.friends.count }}
+            <p class="text-muted">Friends</p>
+          </h6>
+          <p class="card-text text-center">{{ request.user.profile.bio }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock content %}
+</div>
