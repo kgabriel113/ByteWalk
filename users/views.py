@@ -2,12 +2,13 @@ from cgi import test
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Profile
 from feed.models import Post
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from .models import Profile, FriendRequest
+from .models import Profile, FriendRequest, Interest
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from .functions import FriendRequestManager
 import random
@@ -140,7 +141,8 @@ def my_profile(request):
 		'friends_list': p.friends.all(),
 		'sent_friend_requests': FriendRequest.objects.filter(from_user=you),
 		'rec_friend_requests': FriendRequest.objects.filter(to_user=you),
-		'post_count': Post.objects.filter(user_name=you).count
+		'post_count': Post.objects.filter(user_name=you).count,
+		'interests': p.interests.all()[:5]
 	}
 
 	return render(request, "users/profile.html", context)
@@ -153,3 +155,33 @@ def search_users(request):
 		'users': object_list
 	}
 	return render(request, "users/search_users.html", context)
+
+@login_required
+def delete_interest(request, interest):
+	user = request.user
+	p = user.profile
+	interest = p.interests.get(name=interest)
+	if not interest:
+		return HttpResponseRedirect('/my-profile/')
+	p.interests.remove(interest)
+	return HttpResponseRedirect('/my-profile/')
+
+@login_required
+def interests(request):
+	user = request.user
+	p = user.profile
+	if request.method == 'POST':
+		interest = request.POST.get('interest')
+		try:
+			interest = Interest.objects.get(name=interest)
+		except ObjectDoesNotExist:
+			interest = Interest.objects.create(name=interest)
+		p.interests.add(interest)
+		return HttpResponseRedirect('/my-profile/')
+	
+
+	context = {
+		'interests': p.interests.all()
+	}
+
+	return render(request, "users/interests.html", context)
