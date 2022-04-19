@@ -1,5 +1,4 @@
-from django.test import TestCase
-from django.test import Client
+from django.test import TestCase, Client
 import json
 from .models import Post, Comments, Like
 from django.contrib.auth.models import User
@@ -52,3 +51,32 @@ class FeedCases(TestCase):
         self.assertEqual(response.status_code, 302)
 
     
+class CondRenderTestCase(TestCase):
+    
+    def setUp(self):
+        self.client = Client()
+        self.LOGIN_ONLY = ["Add New Friends", "Friends", "Profile", "Create Post", "Search posts", "Logout"]
+        self.LOGOUT_ONLY = ["Login", "Register"]
+
+    def test_absence(self):
+        response = self.client.get('/')
+        self.assertContains(response, 'ByteWalk')
+
+        for item in self.LOGIN_ONLY:
+            self.assertNotContains(response, item)
+
+        for item in self.LOGOUT_ONLY:
+            self.assertContains(response, item)
+    
+    def test_presence(self):
+        self.user = User.objects.create_user('portcommunion', 'portcommunion@example.com', 'respondBloating291')
+        self.client.force_login(self.user)
+
+        response = self.client.get('/')
+        self.assertContains(response, 'ByteWalk')
+
+        for item in self.LOGOUT_ONLY:
+            self.assertNotContains(response, item)
+        
+        for item in self.LOGIN_ONLY:
+            self.assertContains(response, item)
